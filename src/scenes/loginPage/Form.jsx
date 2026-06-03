@@ -16,7 +16,7 @@ import { useDispatch } from "react-redux";
 import { setLogin } from "state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
-import BASE_URL from "api/config";
+import { buildApiUrl } from "api/config";
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
@@ -68,13 +68,10 @@ const Form = () => {
     }
     formData.append("picturePath", values.picture.name);
 
-    const savedUserResponse = await fetch(
-      `${BASE_URL}/auth/register`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+    const savedUserResponse = await fetch(buildApiUrl("/auth/register"), {
+      method: "POST",
+      body: formData,
+    });
     const savedUser = await savedUserResponse.json();
     onSubmitProps.resetForm();
 
@@ -85,7 +82,7 @@ const Form = () => {
 
   const login = async (values, onSubmitProps) => {
     try {
-      const loggedInResponse = await fetch(`${BASE_URL}/auth/login`, {
+      const loggedInResponse = await fetch(buildApiUrl("/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
