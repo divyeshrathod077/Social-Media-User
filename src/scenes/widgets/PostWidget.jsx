@@ -181,6 +181,29 @@ const deletePostHandler = async () => {
       ? videoPath
       : `${BASE_URL}/assets/${videoPath}`);
 
+  const getVideoType = (src) => {
+    if (!src) return "video/mp4";
+    const ext = src
+      .split("?")[0]
+      .split("#")[0]
+      .split(".")
+      .pop()
+      .toLowerCase();
+    switch (ext) {
+      case "mov":
+        return "video/quicktime";
+      case "avi":
+        return "video/x-msvideo";
+      case "webm":
+        return "video/webm";
+      case "ogg":
+      case "ogv":
+        return "video/ogg";
+      default:
+        return "video/mp4";
+    }
+  };
+
   return (
     <WidgetWrapper m="2rem 0">
       {/* USER */}
@@ -224,18 +247,14 @@ const deletePostHandler = async () => {
             width="100%"
             height="500"
             controls
+            preload="metadata"
             style={{
               borderRadius: "0.75rem",
               backgroundColor: "black",
             }}
           >
-            <source
-              src={video}
-              type="video/mp4"
-            />
-
-            Your browser does not
-            support video.
+            <source src={video} type={getVideoType(video)} />
+            Your browser does not support video.
           </video>
         </Box>
       )}
