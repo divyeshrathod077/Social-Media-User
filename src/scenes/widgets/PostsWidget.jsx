@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "state";
+import BASE_URL from "api/config";
 import PostWidget from "./PostWidget";
 
 const PostsWidget = ({ userId, isProfile = false }) => {
@@ -10,7 +11,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   // ✅ Get ALL posts (feed)
   const getPosts = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:3001/posts", {
+      const response = await fetch(`${BASE_URL}/posts`, {
         method: "GET",
       });
 
@@ -25,7 +26,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   const getUserPosts = useCallback(async () => {
     try {
       const response = await fetch(
-        `http://localhost:3001/posts/${userId}/posts`,
+        `${BASE_URL}/posts/${userId}/posts`,
         {
           method: "GET",
         }
