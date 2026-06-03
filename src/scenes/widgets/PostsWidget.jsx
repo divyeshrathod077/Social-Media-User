@@ -1,65 +1,54 @@
-
-import { useEffect } from "react";
-
+import { useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
 import { setPosts } from "state";
-
 import PostWidget from "./PostWidget";
-import BASE_URL from "api/config";
-
 
 const PostsWidget = ({ userId, isProfile = false }) => {
   const dispatch = useDispatch();
-
   const posts = useSelector((state) => state.posts);
 
-  const token = useSelector((state) => state.token);
-
-  const getPosts = async () => {
-    const response = await fetch(
-      `${BASE_URL}/posts`,
-      {
+  // ✅ Get ALL posts (feed)
+  const getPosts = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:3001/posts", {
         method: "GET",
+      });
 
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+      const data = await response.json();
+      dispatch(setPosts({ posts: data }));
+    } catch (err) {
+      console.log("Error fetching posts:", err);
+    }
+  }, [dispatch]);
 
-    const data = await response.json();
+  // ✅ Get USER posts (profile)
+  const getUserPosts = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/posts/${userId}/posts`,
+        {
+          method: "GET",
+        }
+      );
 
-    dispatch(setPosts({ posts: data }));
-  };
+      const data = await response.json();
+      dispatch(setPosts({ posts: data }));
+    } catch (err) {
+      console.log("Error fetching user posts:", err);
+    }
+  }, [dispatch, userId]);
 
-  const getUserPosts = async () => {
-    const response = await fetch(
-      `${BASE_URL}/posts/${userId}/posts`,
-      {
-        method: "GET",
-
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const data = await response.json();
-
-    dispatch(setPosts({ posts: data }));
-  };
-
+  // ✅ Main effect
   useEffect(() => {
-    if (isProfile) {
+    if (isProfile && userId) {
       getUserPosts();
     } else {
       getPosts();
     }
-  }, [isProfile,getPosts,getUserPosts]);
+  }, [isProfile, userId, getPosts, getUserPosts]);
 
   return (
-    <>
+    <div>
       {posts.map(
         ({
           _id,
@@ -69,7 +58,6 @@ const PostsWidget = ({ userId, isProfile = false }) => {
           description,
           location,
           picturePath,
-          videoPath,
           userPicturePath,
           likes,
           comments,
@@ -82,14 +70,13 @@ const PostsWidget = ({ userId, isProfile = false }) => {
             description={description}
             location={location}
             picturePath={picturePath}
-            videoPath={videoPath}
             userPicturePath={userPicturePath}
             likes={likes}
             comments={comments}
           />
         )
       )}
-    </>
+    </div>
   );
 };
 
