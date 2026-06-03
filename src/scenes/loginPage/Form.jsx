@@ -50,8 +50,8 @@ const initialValuesLogin = {
 
 const Form = () => {
   const [pageType, setPageType] = useState("login");
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
+ // const [email,setEmail] = useState("");
+  //const [password,setPassword] = useState("");
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
