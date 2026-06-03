@@ -1,4 +1,4 @@
-const rawBaseUrl = process.env.REACT_APP_BASE_URL || "https://social-media-server-six-virid.vercel.app";
+const rawBaseUrl = process.env.REACT_APP_BASE_URL || "https://social-media-server-eiad.onrender.com";
 
 export const BASE_URL = rawBaseUrl.replace(/\/+$/, "");
 
