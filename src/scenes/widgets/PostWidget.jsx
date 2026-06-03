@@ -19,13 +19,10 @@ import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
 
 import { useState } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
-
 import { setPost, setPosts } from "state";
 import Swal from "sweetalert2";
 import BASE_URL from "api/config";
-
 
 const PostWidget = ({
   postId,
@@ -33,176 +30,111 @@ const PostWidget = ({
   name,
   description,
   location,
-
   picturePath,
   videoPath,
-
   userPicturePath,
   likes,
   comments,
 }) => {
-  const [isComments, setIsComments] =
-    useState(false);
+  const [isComments, setIsComments] = useState(false);
 
   const dispatch = useDispatch();
 
-  const token = useSelector(
-    (state) => state.token
-  );
+  const token = useSelector((state) => state.token);
+  const loggedInUserId = useSelector((state) => state.user._id);
 
-  const loggedInUserId = useSelector(
-    (state) => state.user._id
-  );
-
-  const isLiked = Boolean(
-    likes[loggedInUserId]
-  );
-
-  const likeCount = Object.keys(likes).length;
+  const isLiked = Boolean(likes?.[loggedInUserId]);
+  const likeCount = Object.keys(likes || {}).length;
 
   const { palette } = useTheme();
-
   const main = palette.neutral.main;
-
   const primary = palette.primary.main;
 
-  /* =========================
-     LIKE POST
-  ========================= */
-
+  /* ================= LIKE ================= */
   const patchLike = async () => {
     try {
       const response = await fetch(
         `${BASE_URL}/posts/${postId}/like`,
         {
           method: "PATCH",
-
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
-
-          body: JSON.stringify({
-            userId: loggedInUserId,
-          }),
+          body: JSON.stringify({ userId: loggedInUserId }),
         }
       );
 
-      const updatedPost =
-        await response.json();
+      const updatedPost = await response.json();
 
-      dispatch(
-        setPost({
-          post: updatedPost,
-        })
-      );
+      dispatch(setPost({ post: updatedPost }));
     } catch (err) {
       console.log(err);
     }
   };
 
-  /* =========================
-     DELETE POST
-  ========================= */
-const deletePostHandler = async () => {
-  const result = await Swal.fire({
-    title: "Delete Post?",
-    text: "This post will be removed permanently.",
-    icon: "warning",
-
-    showCancelButton: true,
-
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-
-    confirmButtonText: "Yes, delete it!",
-  });
-
-  // CANCEL
-  if (!result.isConfirmed) return;
-
-  try {
-    const response = await fetch(
-      `${BASE_URL}/posts/${postId}`,
-      {
-        method: "DELETE",
-
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const updatedPosts = await response.json();
-
-    dispatch(
-      setPosts({
-        posts: updatedPosts,
-      })
-    );
-
-    // SUCCESS ALERT
-    Swal.fire({
-      title: "Deleted!",
-      text: "Your post has been deleted.",
-      icon: "success",
-      timer: 1500,
-      showConfirmButton: false,
+  /* ================= DELETE ================= */
+  const deletePostHandler = async () => {
+    const result = await Swal.fire({
+      title: "Delete Post?",
+      text: "This post will be removed permanently.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
     });
-  } catch (err) {
-    console.log(err);
 
-    Swal.fire({
-      title: "Error!",
-      text: "Something went wrong.",
-      icon: "error",
-    });
-  }
-};
- 
-  /* =========================
-     IMAGE URL
-  ========================= */
+    if (!result.isConfirmed) return;
 
-  const image =
-    picturePath &&
-    (picturePath.startsWith("http")
-      ? picturePath
-      : `${BASE_URL}/assets/${picturePath}`);
+    try {
+      const response = await fetch(
+        `${BASE_URL}/posts/${postId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  /* =========================
-     VIDEO URL
-  ========================= */
+      const updatedPosts = await response.json();
 
-  const video =
-    videoPath &&
-    (videoPath.startsWith("http")
-      ? videoPath
-      : `${BASE_URL}/assets/${videoPath}`);
+      dispatch(setPosts({ posts: updatedPosts }));
 
-  const getVideoType = (src) => {
-    if (!src) return "video/mp4";
-    const ext = src
-      .split("?")[0]
-      .split("#")[0]
-      .split(".")
-      .pop()
-      .toLowerCase();
-    switch (ext) {
-      case "mov":
-        return "video/quicktime";
-      case "avi":
-        return "video/x-msvideo";
-      case "webm":
-        return "video/webm";
-      case "ogg":
-      case "ogv":
-        return "video/ogg";
-      default:
-        return "video/mp4";
+      Swal.fire({
+        title: "Deleted!",
+        text: "Your post has been deleted.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.log(err);
+
+      Swal.fire({
+        title: "Error!",
+        text: "Something went wrong.",
+        icon: "error",
+      });
     }
   };
+
+  /* ================= IMAGE URL ================= */
+  const image =
+    picturePath
+      ? picturePath.startsWith("http")
+        ? picturePath
+        : `${BASE_URL}/assets/${picturePath}`
+      : null;
+
+  /* ================= VIDEO URL (FIXED) ================= */
+  const video =
+    videoPath
+      ? videoPath.startsWith("http")
+        ? videoPath
+        : `${BASE_URL}/assets/${videoPath}`
+      : null;
 
   return (
     <WidgetWrapper m="2rem 0">
@@ -211,16 +143,11 @@ const deletePostHandler = async () => {
         friendId={postUserId}
         name={name}
         subtitle={location}
-        userPicturePath={
-          userPicturePath
-        }
+        userPicturePath={userPicturePath}
       />
 
       {/* DESCRIPTION */}
-      <Typography
-        color={main}
-        sx={{ mt: "1rem" }}
-      >
+      <Typography color={main} sx={{ mt: "1rem" }}>
         {description}
       </Typography>
 
@@ -240,20 +167,21 @@ const deletePostHandler = async () => {
         </Box>
       )}
 
-      {/* VIDEO */}
+      {/* VIDEO (FIXED WORKING VERSION) */}
       {video && (
         <Box mt="1rem">
           <video
             width="100%"
             height="500"
             controls
+            playsInline
             preload="metadata"
             style={{
               borderRadius: "0.75rem",
               backgroundColor: "black",
             }}
           >
-            <source src={video} type={getVideoType(video)} />
+            <source src={video} />
             Your browser does not support video.
           </video>
         </Box>
@@ -264,58 +192,35 @@ const deletePostHandler = async () => {
         <FlexBetween gap="1rem">
           {/* LIKE */}
           <FlexBetween gap="0.3rem">
-            <IconButton
-              onClick={patchLike}
-            >
+            <IconButton onClick={patchLike}>
               {isLiked ? (
-                <FavoriteOutlined
-                  sx={{
-                    color: primary,
-                  }}
-                />
+                <FavoriteOutlined sx={{ color: primary }} />
               ) : (
                 <FavoriteBorderOutlined />
               )}
             </IconButton>
 
-            <Typography>
-              {likeCount}
-            </Typography>
+            <Typography>{likeCount}</Typography>
           </FlexBetween>
 
           {/* COMMENT */}
           <FlexBetween gap="0.3rem">
-            <IconButton
-              onClick={() =>
-                setIsComments(
-                  !isComments
-                )
-              }
-            >
+            <IconButton onClick={() => setIsComments(!isComments)}>
               <ChatBubbleOutlineOutlined />
             </IconButton>
 
-            <Typography>
-              {comments.length}
-            </Typography>
+            <Typography>{comments?.length || 0}</Typography>
           </FlexBetween>
         </FlexBetween>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT */}
         <FlexBetween gap="0.5rem">
-          {/* SHARE */}
           <IconButton>
             <ShareOutlined />
           </IconButton>
 
-          {/* DELETE */}
-          {loggedInUserId ===
-            postUserId && (
-            <IconButton
-              onClick={
-                deletePostHandler
-              }
-            >
+          {loggedInUserId === postUserId && (
+            <IconButton onClick={deletePostHandler}>
               <DeleteOutlined />
             </IconButton>
           )}
@@ -325,24 +230,20 @@ const deletePostHandler = async () => {
       {/* COMMENTS */}
       {isComments && (
         <Box mt="0.5rem">
-          {comments.map(
-            (comment, i) => (
-              <Box key={i}>
-                <Divider />
-
-                <Typography
-                  sx={{
-                    color: main,
-                    m: "0.5rem 0",
-                    pl: "1rem",
-                  }}
-                >
-                  {comment}
-                </Typography>
-              </Box>
-            )
-          )}
-
+          {comments?.map((comment, i) => (
+            <Box key={i}>
+              <Divider />
+              <Typography
+                sx={{
+                  color: main,
+                  m: "0.5rem 0",
+                  pl: "1rem",
+                }}
+              >
+                {comment}
+              </Typography>
+            </Box>
+          ))}
           <Divider />
         </Box>
       )}

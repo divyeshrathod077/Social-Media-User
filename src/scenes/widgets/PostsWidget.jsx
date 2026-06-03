@@ -7,12 +7,16 @@ import PostWidget from "./PostWidget";
 const PostsWidget = ({ userId, isProfile = false }) => {
   const dispatch = useDispatch();
   const posts = useSelector((state) => state.posts);
+  const token = useSelector((state) => state.token);
 
   // ✅ Get ALL posts (feed)
   const getPosts = useCallback(async () => {
     try {
       const response = await fetch(`${BASE_URL}/posts`, {
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await response.json();
@@ -20,7 +24,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     } catch (err) {
       console.log("Error fetching posts:", err);
     }
-  }, [dispatch]);
+  }, [dispatch, token]);
 
   // ✅ Get USER posts (profile)
   const getUserPosts = useCallback(async () => {
@@ -29,6 +33,9 @@ const PostsWidget = ({ userId, isProfile = false }) => {
         `${BASE_URL}/posts/${userId}/posts`,
         {
           method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -37,7 +44,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     } catch (err) {
       console.log("Error fetching user posts:", err);
     }
-  }, [dispatch, userId]);
+  }, [dispatch, userId, token]);
 
   // ✅ Main effect
   useEffect(() => {
@@ -59,6 +66,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
           description,
           location,
           picturePath,
+          videoPath,
           userPicturePath,
           likes,
           comments,
@@ -71,6 +79,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
             description={description}
             location={location}
             picturePath={picturePath}
+            videoPath={videoPath}
             userPicturePath={userPicturePath}
             likes={likes}
             comments={comments}
