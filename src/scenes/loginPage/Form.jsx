@@ -84,21 +84,33 @@ const Form = () => {
   };
 
   const login = async (values, onSubmitProps) => {
-    const loggedInResponse = await fetch(`${BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const loggedIn = await loggedInResponse.json();
-    onSubmitProps.resetForm();
-    if (loggedIn) {
-      dispatch(
-        setLogin({
-          user: loggedIn.user,
-          token: loggedIn.token,
-        })
-      );
-      navigate("/home");
+    try {
+      const loggedInResponse = await fetch(`${BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const loggedIn = await loggedInResponse.json();
+
+      if (!loggedInResponse.ok) {
+        console.error("Login Error:", loggedIn.msg || loggedIn.error);
+        alert(loggedIn.msg || "Login failed");
+        return;
+      }
+
+      onSubmitProps.resetForm();
+      if (loggedIn) {
+        dispatch(
+          setLogin({
+            user: loggedIn.user,
+            token: loggedIn.token,
+          })
+        );
+        navigate("/home");
+      }
+    } catch (error) {
+      console.error("Login Exception:", error);
+      alert("Error connecting to server");
     }
   };
 
