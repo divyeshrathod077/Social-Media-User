@@ -10,6 +10,7 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import ImageIcon from "@mui/icons-material/Image";
 import VideocamIcon from "@mui/icons-material/Videocam";
+import CloseIcon from "@mui/icons-material/Close";
 
 import {
   useEffect,
@@ -71,7 +72,7 @@ const ChatPage = () => {
   const scrollRef = useRef();
 
   /* =========================
-     THEME
+        THEME
   ========================= */
 
   const isDarkMode = mode === "dark";
@@ -99,7 +100,7 @@ const ChatPage = () => {
     : "#ccc";
 
   /* =========================
-     GET RECEIVER
+        GET RECEIVER
   ========================= */
 
   useEffect(() => {
@@ -129,7 +130,7 @@ const ChatPage = () => {
   }, [receiverId, token]);
 
   /* =========================
-     SOCKET
+        SOCKET
   ========================= */
 
   useEffect(() => {
@@ -155,7 +156,7 @@ const ChatPage = () => {
   }, [user]);
 
   /* =========================
-     GET MESSAGES
+        GET MESSAGES
   ========================= */
 
   const getMessages = useCallback(
@@ -182,7 +183,7 @@ const ChatPage = () => {
   );
 
   /* =========================
-     CONVERSATION
+        CONVERSATION
   ========================= */
 
   useEffect(() => {
@@ -234,7 +235,7 @@ const ChatPage = () => {
   ]);
 
   /* =========================
-     FILE SELECT
+        FILE SELECT
   ========================= */
 
   const handleImage = (e) => {
@@ -256,7 +257,7 @@ const ChatPage = () => {
   };
 
   /* =========================
-     SEND MESSAGE
+        SEND MESSAGE
   ========================= */
 
   const sendMessage = async () => {
@@ -270,9 +271,6 @@ const ChatPage = () => {
     try {
       const hasMedia =
         image || video;
-
-      /* ONLY SHOW BAR
-         FOR IMAGE/VIDEO */
 
       if (hasMedia) {
         setUploading(true);
@@ -418,7 +416,7 @@ const ChatPage = () => {
   };
 
   /* =========================
-     AUTO SCROLL
+        AUTO SCROLL
   ========================= */
 
   useEffect(() => {
@@ -428,7 +426,7 @@ const ChatPage = () => {
   }, [messages]);
 
   /* =========================
-     ONLINE STATUS
+        ONLINE STATUS
   ========================= */
 
   const isOnline = onlineUsers.some(
@@ -442,6 +440,7 @@ const ChatPage = () => {
       flexDirection="column"
       bgcolor={background}
     >
+
       {/* HEADER */}
 
       <Box
@@ -600,88 +599,187 @@ const ChatPage = () => {
       <Box
         p="1rem"
         display="flex"
-        gap="0.5rem"
+        flexDirection="column"
+        gap="0.7rem"
         borderTop={`1px solid ${borderColor}`}
         bgcolor={headerBg}
       >
-        {/* IMAGE */}
 
-        <IconButton
-          component="label"
+        {/* PREVIEW IMAGE/VIDEO */}
+
+        {(image || video) && (
+          <Box
+            position="relative"
+            width="160px"
+            border={`1px solid ${borderColor}`}
+            borderRadius="10px"
+            overflow="hidden"
+          >
+
+            {/* IMAGE PREVIEW */}
+
+            {image && (
+              <img
+                src={URL.createObjectURL(image)}
+                alt="preview"
+                width="100%"
+                style={{
+                  maxHeight:
+                    "160px",
+                  objectFit:
+                    "cover",
+                  display:
+                    "block",
+                }}
+              />
+            )}
+
+            {/* VIDEO PREVIEW */}
+
+            {video && (
+              <video
+                controls
+                width="100%"
+                style={{
+                  maxHeight:
+                    "160px",
+                  objectFit:
+                    "cover",
+                  display:
+                    "block",
+                }}
+              >
+                <source
+                  src={URL.createObjectURL(video)}
+                  type={video.type}
+                />
+              </video>
+            )}
+
+            {/* REMOVE BUTTON */}
+
+            <IconButton
+              size="small"
+              onClick={() => {
+                setImage(null);
+                setVideo(null);
+              }}
+              sx={{
+                position:
+                  "absolute",
+                top: 5,
+                right: 5,
+                bgcolor:
+                  "rgba(0,0,0,0.6)",
+                color: "#fff",
+              }}
+            >
+              <CloseIcon
+                fontSize="small"
+              />
+            </IconButton>
+          </Box>
+        )}
+
+        {/* INPUT ROW */}
+
+        <Box
+          display="flex"
+          gap="0.5rem"
+          alignItems="center"
         >
-          <ImageIcon
-            sx={{
-              color: textColor,
-            }}
-          />
 
-          <input
-            hidden
-            type="file"
-            accept="image/*"
-            onChange={handleImage}
-          />
-        </IconButton>
+          {/* IMAGE */}
 
-        {/* VIDEO */}
+          <IconButton
+            component="label"
+          >
+            <ImageIcon
+              sx={{
+                color: textColor,
+              }}
+            />
 
-        <IconButton
-          component="label"
-        >
-          <VideocamIcon
-            sx={{
-              color: textColor,
-            }}
-          />
+            <input
+              hidden
+              type="file"
+              accept="image/*"
+              onChange={
+                handleImage
+              }
+            />
+          </IconButton>
 
-          <input
-            hidden
-            type="file"
-            accept="video/*"
-            onChange={handleVideo}
-          />
-        </IconButton>
+          {/* VIDEO */}
 
-        {/* INPUT */}
+          <IconButton
+            component="label"
+          >
+            <VideocamIcon
+              sx={{
+                color: textColor,
+              }}
+            />
 
-        <TextField
-          fullWidth
-          placeholder="Type message..."
-          value={text}
-          onChange={(e) =>
-            setText(e.target.value)
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              sendMessage();
+            <input
+              hidden
+              type="file"
+              accept="video/*"
+              onChange={
+                handleVideo
+              }
+            />
+          </IconButton>
+
+          {/* TEXT INPUT */}
+
+          <TextField
+            fullWidth
+            placeholder="Type message..."
+            value={text}
+            onChange={(e) =>
+              setText(
+                e.target.value
+              )
             }
-          }}
-          sx={{
-            input: {
-              color: textColor,
-            },
-
-            "& .MuiOutlinedInput-root":
-              {
-                "& fieldset": {
-                  borderColor:
-                    borderColor,
-                },
-              },
-          }}
-        />
-
-        {/* SEND */}
-
-        <IconButton
-          onClick={sendMessage}
-        >
-          <SendIcon
+            onKeyDown={(e) => {
+              if (
+                e.key === "Enter"
+              ) {
+                sendMessage();
+              }
+            }}
             sx={{
-              color: "#1976d2",
+              input: {
+                color:
+                  textColor,
+              },
+
+              "& .MuiOutlinedInput-root":
+                {
+                  "& fieldset":
+                    {
+                      borderColor:
+                        borderColor,
+                    },
+                },
             }}
           />
-        </IconButton>
+
+          {/* SEND */}
+
+          <IconButton
+            onClick={sendMessage}
+          >
+            <SendIcon
+              sx={{
+                color:
+                  "#1976d2",
+              }}
+            />
+          </IconButton>
+
+        </Box>
       </Box>
     </Box>
   );
