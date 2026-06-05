@@ -6,6 +6,8 @@ import {
   DeleteOutlined,
 } from "@mui/icons-material";
 
+import MessageOutlinedIcon from "@mui/icons-material/MessageOutlined";
+
 import {
   Box,
   Divider,
@@ -21,8 +23,12 @@ import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost, setPosts } from "state";
+
 import Swal from "sweetalert2";
+
 import BASE_URL from "api/config";
+
+import { useNavigate } from "react-router-dom";
 
 const PostWidget = ({
   postId,
@@ -40,17 +46,26 @@ const PostWidget = ({
 
   const dispatch = useDispatch();
 
+  const navigate = useNavigate();
+
   const token = useSelector((state) => state.token);
-  const loggedInUserId = useSelector((state) => state.user._id);
+
+  const loggedInUserId = useSelector(
+    (state) => state.user._id
+  );
 
   const isLiked = Boolean(likes?.[loggedInUserId]);
+
   const likeCount = Object.keys(likes || {}).length;
 
   const { palette } = useTheme();
+
   const main = palette.neutral.main;
+
   const primary = palette.primary.main;
 
   /* ================= LIKE ================= */
+
   const patchLike = async () => {
     try {
       const response = await fetch(
@@ -61,7 +76,9 @@ const PostWidget = ({
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ userId: loggedInUserId }),
+          body: JSON.stringify({
+            userId: loggedInUserId,
+          }),
         }
       );
 
@@ -74,6 +91,7 @@ const PostWidget = ({
   };
 
   /* ================= DELETE ================= */
+
   const deletePostHandler = async () => {
     const result = await Swal.fire({
       title: "Delete Post?",
@@ -121,24 +139,30 @@ const PostWidget = ({
   };
 
   /* ================= IMAGE URL ================= */
-  const image =
-    picturePath
-      ? picturePath.startsWith("http")
-        ? picturePath
-        : `${BASE_URL}/assets/${picturePath}`
-      : null;
 
-  /* ================= VIDEO URL (FIXED) ================= */
-  const video =
-    videoPath
-      ? videoPath.startsWith("http")
-        ? videoPath
-        : `${BASE_URL}/assets/${videoPath}`
-      : null;
+  const image = picturePath
+    ? picturePath.startsWith("http")
+      ? picturePath
+      : `${BASE_URL}/assets/${picturePath}`
+    : null;
+
+  /* ================= VIDEO URL ================= */
+
+  const video = videoPath
+    ? videoPath.startsWith("http")
+      ? videoPath
+      : `${BASE_URL}/assets/${videoPath}`
+    : null;
+
+  /* ================= OPEN CHAT ================= */
+
+  const openChat = () => {
+    navigate(`/chat/${postUserId}`);
+  };
 
   return (
     <WidgetWrapper m="2rem 0">
-      {/* USER */}
+      {/* USER INFO */}
       <Friend
         friendId={postUserId}
         name={name}
@@ -147,7 +171,10 @@ const PostWidget = ({
       />
 
       {/* DESCRIPTION */}
-      <Typography color={main} sx={{ mt: "1rem" }}>
+      <Typography
+        color={main}
+        sx={{ mt: "1rem" }}
+      >
         {description}
       </Typography>
 
@@ -167,7 +194,7 @@ const PostWidget = ({
         </Box>
       )}
 
-      {/* VIDEO (FIXED WORKING VERSION) */}
+      {/* VIDEO */}
       {video && (
         <Box mt="1rem">
           <video
@@ -187,14 +214,16 @@ const PostWidget = ({
         </Box>
       )}
 
-      {/* ACTIONS */}
-      <FlexBetween mt="0.5rem">
+      {/* ACTION BUTTONS */}
+      <FlexBetween mt="0.75rem">
         <FlexBetween gap="1rem">
           {/* LIKE */}
           <FlexBetween gap="0.3rem">
             <IconButton onClick={patchLike}>
               {isLiked ? (
-                <FavoriteOutlined sx={{ color: primary }} />
+                <FavoriteOutlined
+                  sx={{ color: primary }}
+                />
               ) : (
                 <FavoriteBorderOutlined />
               )}
@@ -203,36 +232,56 @@ const PostWidget = ({
             <Typography>{likeCount}</Typography>
           </FlexBetween>
 
-          {/* COMMENT */}
+          {/* COMMENTS */}
           <FlexBetween gap="0.3rem">
-            <IconButton onClick={() => setIsComments(!isComments)}>
+            <IconButton
+              onClick={() =>
+                setIsComments(!isComments)
+              }
+            >
               <ChatBubbleOutlineOutlined />
             </IconButton>
 
-            <Typography>{comments?.length || 0}</Typography>
+            <Typography>
+              {comments?.length || 0}
+            </Typography>
           </FlexBetween>
+
+          {/* MESSAGE */}
+          {loggedInUserId !== postUserId && (
+            <FlexBetween gap="0.3rem">
+              <IconButton onClick={openChat}>
+                <MessageOutlinedIcon />
+              </IconButton>
+            </FlexBetween>
+          )}
         </FlexBetween>
 
-        {/* RIGHT */}
+        {/* RIGHT SIDE */}
         <FlexBetween gap="0.5rem">
+          {/* SHARE */}
           <IconButton>
             <ShareOutlined />
           </IconButton>
 
+          {/* DELETE */}
           {loggedInUserId === postUserId && (
-            <IconButton onClick={deletePostHandler}>
+            <IconButton
+              onClick={deletePostHandler}
+            >
               <DeleteOutlined />
             </IconButton>
           )}
         </FlexBetween>
       </FlexBetween>
 
-      {/* COMMENTS */}
+      {/* COMMENTS SECTION */}
       {isComments && (
         <Box mt="0.5rem">
           {comments?.map((comment, i) => (
             <Box key={i}>
               <Divider />
+
               <Typography
                 sx={{
                   color: main,
@@ -244,6 +293,7 @@ const PostWidget = ({
               </Typography>
             </Box>
           ))}
+
           <Divider />
         </Box>
       )}

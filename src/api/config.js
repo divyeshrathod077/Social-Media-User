@@ -1,4 +1,4 @@
-const rawBaseUrl = process.env.REACT_APP_BASE_URL || "https://social-media-server-eiad.onrender.com";
+const rawBaseUrl = process.env.REACT_APP_BASE_URL || "http://localhost:3001";
 
 export const BASE_URL = rawBaseUrl.replace(/\/+$/, "");
 
