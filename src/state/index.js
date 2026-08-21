@@ -11,28 +11,28 @@ export const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // 🌙 Toggle Dark/Light Mode
+    //  Toggle Dark/Light Mode
     setMode: (state) => {
       state.mode = state.mode === "light" ? "dark" : "light";
     },
 
-    // 🔐 Login
+    //  Login
     setLogin: (state, action) => {
       state.user = {
         ...action.payload.user,
-        friends: action.payload.user?.friends || [], // ✅ ensure array
+        friends: action.payload.user?.friends || [], //  ensure array
       };
       state.token = action.payload.token;
     },
 
-    // 🚪 Logout
+    //  Logout
     setLogout: (state) => {
       state.user = null;
       state.token = null;
       state.posts = [];
     },
 
-    // 👥 Set Friends (SAFE)
+    //  Set Friends 
     setFriends: (state, action) => {
       if (state.user) {
         state.user.friends = Array.isArray(action.payload.friends)
@@ -43,14 +43,14 @@ export const authSlice = createSlice({
       }
     },
 
-    // 📝 Set All Posts
+    //  Set All Posts
     setPosts: (state, action) => {
       state.posts = Array.isArray(action.payload.posts)
         ? action.payload.posts
         : [];
     },
 
-    // 🔄 Update Single Post
+    //  Update Single Post
     setPost: (state, action) => {
       state.posts = state.posts.map((post) =>
         post._id === action.payload.post._id
@@ -61,7 +61,7 @@ export const authSlice = createSlice({
   },
 });
 
-// ✅ Export Actions
+//  Export Actions
 export const {
   setMode,
   setLogin,
@@ -71,5 +71,5 @@ export const {
   setPost,
 } = authSlice.actions;
 
-// ✅ Export Reducer
+//  Export Reducer
 export default authSlice.reducer;
